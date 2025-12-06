@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build C++23 (Release)",
+      "type": "shell",
+      "command": "C:/msys64/mingw64/bin/g++.exe",
+      "args": [
+        "-std=gnu++23",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wshadow",
+        "-Wconversion",
+        "${file}",
+        "-o",
+        "${fileDirname}/a.exe"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "Build C++23 (Debug)",
+      "type": "shell",
+      "command": "C:/msys64/mingw64/bin/g++.exe",
+      "args": [
+        "-std=gnu++23",
+        "-g",
+        "-O0",
+        "-Wall",
+        "-Wextra",
+        "${file}",
+        "-o",
+        "${fileDirname}/a.exe"
+      ],
+      "group": "build",
+      "problemMatcher": [
+        "$gcc"
+      ]
+    }
+  ]
+}
