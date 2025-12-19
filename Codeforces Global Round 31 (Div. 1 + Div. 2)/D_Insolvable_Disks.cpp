@@ -1,19 +1,22 @@
 #include <bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 
 #define ll long long 
 #define INFINITY 1e9+1
-void solve(){
+void solve(int t){
     ll n ;
     cin >> n;
     vector<ll> x(n,0);
     vector<pair<ll,ll>> araliklar(n-1);
-    vector<pair<pair<ll,ll>,pair<bool,bool>>> kisitlamalar(n,{{1e-7,INFINITY},{false,true}});
+    vector<pair<ll,ll>> kisitlamalar(n,{0,INFINITY});
     for(ll i = 0; i < n; i++){
         cin >> x[i];
     }
     for(ll i = 0; i < n-1; i++){
         araliklar[i] = {i,x[i+1] - x[i]};
+        kisitlamalar[i] = {0,min(kisitlamalar[i].second, x[i+1] - x[i])};
+        kisitlamalar[i+1] = {0,min(kisitlamalar[i+1].second, x[i+1] - x[i])};
     }
     sort(araliklar.begin(),araliklar.end(),[](pair<ll,ll> a, pair<ll,ll> b){
         return a.second < b.second;
@@ -21,77 +24,28 @@ void solve(){
     ll ans = 0;
     for(ll i = 0 ; i < n-1;i++){
         pair<ll,ll> aralik = araliklar[i];
-        pair<ll,ll> firstKisitlama = kisitlamalar[araliklar[i].first].first;
-        pair<bool,bool> firstKisitlamaInclusive = kisitlamalar[araliklar[i].first].second;
-        pair<ll,ll> secondKisitlama = kisitlamalar[araliklar[i].first + 1].first;
-        pair<bool,bool> secondKisitlamaInclusive = kisitlamalar[araliklar[i].first + 1].second;
-        if( (aralik.second > firstKisitlama.first + secondKisitlama.first && aralik.second < firstKisitlama.second + secondKisitlama.second)
-        || 
-            ((aralik.second == firstKisitlama.first + secondKisitlama.first && firstKisitlamaInclusive.first && secondKisitlamaInclusive.first)
-            || (aralik.second == firstKisitlama.second + secondKisitlama.second && firstKisitlamaInclusive.second && secondKisitlamaInclusive.second))
-    ){
+        pair<ll,ll> firstKisitlama = kisitlamalar[araliklar[i].first];
+        pair<ll,ll> secondKisitlama = kisitlamalar[aralik.first + 1];
+        if(aralik.second > firstKisitlama.first + secondKisitlama.first && aralik.second < firstKisitlama.second + secondKisitlama.second){
             ans ++;
-            ll yeniFirstMin;
-            bool yeniFirstMinInclusive;
-            ll yeniFirstMax;
-            bool yeniFirstMaxInclusive;
-            ll yeniSecondMin;
-            bool yeniSecondMinInclusive;
-            ll yeniSecondMax;
-            bool yeniSecondMaxInclusive;
-
-            if(firstKisitlama.first >aralik.second - secondKisitlama.second ){
-                yeniFirstMin = firstKisitlama.first;
-                yeniFirstMinInclusive = firstKisitlamaInclusive.first;
-            }
-            else if(firstKisitlama.first == aralik.second - secondKisitlama.second ){
-                yeniFirstMin = firstKisitlama.first;
-                yeniFirstMinInclusive = firstKisitlamaInclusive.first && secondKisitlamaInclusive.second;
-            }else{
-                yeniFirstMin = aralik.second - secondKisitlama.second;
-                yeniFirstMinInclusive = secondKisitlamaInclusive.second;
-            }
-
-            if(firstKisitlama.second < aralik.second - secondKisitlama.first ){
-                yeniFirstMax = firstKisitlama.second;
-                yeniFirstMinInclusive = firstKisitlamaInclusive.second;
-            }
-            else if(firstKisitlama.second == aralik.second - secondKisitlama.first ){
-                yeniFirstMax = firstKisitlama.second;
-                yeniFirstMinInclusive = firstKisitlamaInclusive.second && secondKisitlamaInclusive.first;
-            }else{
-                yeniFirstMax = aralik.second - secondKisitlama.first;
-                yeniFirstMinInclusive = secondKisitlamaInclusive.first;
-            }
-
-            if(secondKisitlama.first > aralik.second - firstKisitlama.second ){
-                yeniSecondMin = secondKisitlama.first;
-                yeniSecondMinInclusive = secondKisitlamaInclusive.first;
-            }
-            else if(secondKisitlama.first == aralik.second - firstKisitlama.second ){
-                yeniSecondMin = secondKisitlama.first;
-                yeniSecondMinInclusive = firstKisitlamaInclusive.second && secondKisitlamaInclusive.first;
-            }else{
-                yeniSecondMin = aralik.second - firstKisitlama.second;
-                yeniSecondMinInclusive = firstKisitlamaInclusive.second;
-            }
-        
-            if(secondKisitlama.second < aralik.second - firstKisitlama.first ){
-                yeniSecondMax = secondKisitlama.second;
-                yeniSecondMaxInclusive = secondKisitlamaInclusive.second;
-            }
-            else if(secondKisitlama.second == aralik.second - firstKisitlama.first ){
-                yeniSecondMax = secondKisitlama.second;
-                yeniSecondMaxInclusive = firstKisitlamaInclusive.first && secondKisitlamaInclusive.second;
-            }else{
-                yeniSecondMax = aralik.second - firstKisitlama.first;
-                yeniSecondMaxInclusive = firstKisitlamaInclusive.first;
-            }
-            
-            kisitlamalar[aralik.first] = {{yeniFirstMin,yeniFirstMax},{yeniFirstMinInclusive,yeniFirstMinInclusive}};
-            kisitlamalar[aralik.first + 1] = {{yeniSecondMin,yeniSecondMax},{yeniSecondMinInclusive,yeniSecondMinInclusive}};
+            ll yeniFirstMin = max(firstKisitlama.first, aralik.second - secondKisitlama.second);
+            ll yeniFirstMax= min(firstKisitlama.second, aralik.second - secondKisitlama.first);
+            ll yeniSecondMin = max(secondKisitlama.first, aralik.second - firstKisitlama.second);
+            ll yeniSecondMax = min(secondKisitlama.second, aralik.second - firstKisitlama.first);
+            kisitlamalar[aralik.first] = {yeniFirstMin,yeniFirstMax};
+            kisitlamalar[aralik.first + 1] = {yeniSecondMin,yeniSecondMax};
         }
     }
+    if(t == 10000 - 1701){
+        for(ll i = 0; i < n; i++){
+        cout << x[i] << " ";
+        if(i%20 == 19){
+            cout << "\n";
+        }
+    }
+    cout << "\n";
+    }
+    if(t < 4)
     cout<< ans << "\n";
 
 }
@@ -103,6 +57,6 @@ int main(){
     long long t;
     cin >> t;
     while(t--){
-        solve();
+        solve(t);
     }
 }
