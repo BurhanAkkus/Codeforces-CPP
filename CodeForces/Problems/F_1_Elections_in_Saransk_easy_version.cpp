@@ -159,44 +159,38 @@ public:
 };
 
 using mint =mod_int<1000000007>;
-
 vector <ll> primes;
-bool primeOrNot[MAX_N];
+int primeIndex[MAX_N] = {};  // direct lookup, no hashing
+
+ll spf[MAX_N];  // spf[i] = smallest prime factor of i
 
 void precomputePrimes(){
-    for(ll i = 2; i < MAX_N; i++){
-        if(!primeOrNot[i]){
-            primes.push_back(i);
-            for(ll j = i * 2; j <= MAX_N;j+=i){
-                primeOrNot[j] = true;
-            }
+    for(int i = 0; i < MAX_N; i++) spf[i] = i;
+    for(int i = 2; (ll)i*i < MAX_N; i++)
+        if(spf[i] == i)  // i is prime
+        {
+          for(int j = i*i; j < MAX_N; j += i)
+              if(spf[j] == j) spf[j] = i;
         }
-    }
+    for(int i = 2; i < MAX_N; i++)
+        if(spf[i] == i) primes.push_back(i); 
+    for(int i = 0; i < (int)primes.size(); i++) primeIndex[primes[i]] = i;
 }
 
-void primeFactorize(ll n, ll* counts){
-    for(int i = 0; i < primes.size(); i++){
-        ll prime = primes[i];
-        if(prime * prime > n){
-            if(n > 1){
-                int idx = lower_bound(primes.begin(), primes.end(), n) - primes.begin();
-                counts[idx]++;
-            }
-            break;
-        }
-        while(n % prime == 0){
-            counts[i]++;
-            n /= prime;
-        }
-        if(n == 1){
-            break;
-        }
+int primeFactorCounts[42000];
+vector<int> touched;
+
+void primeFactorize(ll n, int* counts){
+    while(n > 1){
+        int p = spf[n];
+        int idx = primeIndex[p];
+        if(primeFactorCounts[idx] == 0) touched.push_back(idx);
+        counts[idx]++;
+        n /= p;
     }
 }
-
-
 void solve(){
-    ll primeFactorCounts[42000] = {};
+    touched.clear();
     ll n,x;
     cin >> n >> x;
     for(int i = 0; i < n; i++){
@@ -205,9 +199,10 @@ void solve(){
         primeFactorize(a, primeFactorCounts);
     }
     mint answer = 1;
-    for(ll count : primeFactorCounts)
-    if(count > 0)
-        answer *= count + 1;
+    for(int idx : touched)
+        answer *= primeFactorCounts[idx] + 1;
+    for(int idx : touched)
+        primeFactorCounts[idx] = 0;  // reset only what was touched
     cout << answer.val() << "\n";
 }
 
