@@ -1,8 +1,7 @@
 #include <bits/stdc++.h>
 #define ll long long
 using namespace std;
-#define MAX_N 200002
-
+#define MAX_N 500002
 constexpr int carmichael_constexpr(int n){
   if(n==998244353)return 998244352;
   if(n==1000000007)return 1000000006;
@@ -161,103 +160,6 @@ public:
 
 using mint =mod_int<1000000007>;
 
-mint fact[MAX_N];
-mint inv_fact[MAX_N];
-void precompute_factorials() {
-    fact[0] = 1;
-    for (ll i = 1; i < MAX_N; i++) {
-        fact[i] = (fact[i - 1] * mint(i));
-    }
-    inv_fact[MAX_N-1] = fact[MAX_N-1].inv();  // one modular inverse
-    for (ll i = MAX_N-2; i >= 0; i--)
-        inv_fact[i] = inv_fact[i+1] * mint(i+1);  // work backwards
-}
-
-#define block_size 256
-
-mint combination(int n,int k){
-    if(k<0||k>n)return mint(0);
-    return fact[n]*inv_fact[k]*inv_fact[n-k];
-}
-
-mint binomialPrefixSums[MAX_N/block_size][MAX_N/block_size];
-
-
-
-void precomputeBinomialPrefixSums() {
-    for (ll sn = 0; sn < MAX_N/block_size; sn++) {
-        for (ll sk = 0; sk <= sn; sk++) {
-            if (sk == 0) {
-                binomialPrefixSums[sn][sk] = 1;
-            } else {
-                mint accumulated_sum = binomialPrefixSums[sn][sk-1];
-                for(ll i = 1; i <= block_size; i++) {
-                    ll n = sn * block_size;
-                    accumulated_sum += combination(n, (sk -1) * block_size + i);
-                }
-                binomialPrefixSums[sn][sk] = accumulated_sum;
-            }
-        }
-    }
-}
-
-mint getBinomialPrefixSum(int n, int k) {
-    if (k < 0 || k > n) return mint(0);
-    int remainder_n = n % block_size;
-    int remainder_k = k % block_size;
-    // n is closer to sn * block_size
-    if(remainder_n < block_size/2){
-        // k is closer to sk * block_size
-        if(remainder_k < block_size/2){
-            int sn = n / block_size;
-            int sn_raw = sn * block_size;
-            int sk = k / block_size;
-            int sk_raw = sk * block_size;
-            mint sum = binomialPrefixSums[sn][sk];
-            for(int i=sn_raw;i<n;i++)sum = sum*2-combination(i,sk_raw);
-            for(int i=sk_raw+1;i<=k;i++) sum += combination(n,i);
-            return sum;
-        } 
-        // k is closer to (sk+1) * block size;
-        else{
-            int sn = n / block_size;
-            int sn_raw = sn * block_size;
-            int sk = k / block_size + 1;
-            int sk_raw = sk * block_size;
-            mint sum = binomialPrefixSums[sn][sk];
-            for(int i=sk_raw;i>k;i--) sum -= combination(n,i);
-            for(int i=sn_raw;i<n;i++)sum = sum*2-combination(i,k);
-            return sum; 
-        }
-    }
-    // n is closer to (sn+1) * block_size
-    else{
-        // k is closer to sk * block_size
-        if(remainder_k < block_size /2){
-            int sn = n / block_size + 1;
-            int sn_raw = sn * block_size;
-            int sk = k / block_size;
-            int sk_raw = sk * block_size;
-            mint sum = binomialPrefixSums[sn][sk];
-            for(int i=sn_raw;i>n;i--)sum = (sum + combination(i - 1,sk_raw)) / 2; 
-            for(int i=sk_raw+1;i<=k;i++) sum += combination(n,i);
-            return sum;
-        }
-        // k is closer to (sk + 1) *  block_size
-        else{
-            int sn = n / block_size + 1;
-            int sn_raw = sn * block_size;
-            int sk = k / block_size + 1;
-            int sk_raw = sk * block_size;
-            mint sum = binomialPrefixSums[sn][sk];
-            for(int i=sn_raw;i>n;i--) sum = (sum + combination(i - 1,sk_raw)) / 2; 
-            for(int i=sk_raw;i>k;i--) sum -= combination(n,i);
-            return sum;
-        }
-    }
-}
-
-
 vector <ll> primes;
 bool primeOrNot[MAX_N];
 
@@ -289,5 +191,38 @@ void primeFactorize(ll n, ll* counts){
         if(n == 1){
             break;
         }
+    }
+}
+
+
+void solve(){
+    ll primeFactorCounts[42000] = {};
+    ll n,x;
+    cin >> n >> x;
+    for(int i = 0; i < n; i++){
+        ll a;
+        cin >> a;
+        primeFactorize(a, primeFactorCounts);
+    }
+    mint answer = 1;
+    for(ll count : primeFactorCounts)
+    if(count > 0)
+        answer *= count + 1;
+    cout << answer.val() << "\n";
+}
+
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    long long t=1;
+    // auto start = std::chrono::high_resolution_clock::now();
+    precomputePrimes();
+    // auto end = std::chrono::high_resolution_clock::now();
+    // double ms = std::chrono::duration<double, std::milli>(end - start).count();
+    // cout << "Time: " << ms << " ms\n" << endl;
+    cin >> t;
+    while(t--){
+        solve();
     }
 }
