@@ -283,3 +283,51 @@ void primeFactorize(ll n, ll* counts){
         n /= p;
     }
 }
+
+template<typename T>
+struct AVLNode{
+  AVLNode *left;
+  AVLNode *right;
+  ll depth;
+  T value;
+  
+private:
+
+
+public:
+static ll h(AVLNode<T>* n){ return n ? n->depth : 0; }
+AVLNode(const T& v) : left(nullptr), right(nullptr), depth(1), value(v) {}
+  void insert (AVLNode<T>* node){
+    if(value > node->value){
+      if(left == nullptr ){
+        left = node;
+      }
+      else{
+        left -> insert(node);
+      }
+    }
+    else{
+      if(right == nullptr ){
+        right = node;
+      }
+      else{
+        right -> insert(node);
+      }
+    }
+      depth = 1 + max(h(left), h(right));
+      update();
+  }
+
+};
+
+template<typename T>
+struct AVLTree{
+  AVLNode<T>* root = nullptr;
+
+public:
+  void insert(const T& v){
+    AVLNode<T>* node = new AVLNode<T>(v);
+    if(!root) root = node;
+    else root->insert(node);
+  }
+};
