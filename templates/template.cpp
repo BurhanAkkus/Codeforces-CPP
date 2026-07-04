@@ -2,6 +2,7 @@
 #define ll long long
 using namespace std;
 #define MAX_N 200002
+#define rep(i,start,end,increment) for(ll i=(start);i<(end);i+=(increment))
 
 constexpr int carmichael_constexpr(int n){
   if(n==998244353)return 998244352;
