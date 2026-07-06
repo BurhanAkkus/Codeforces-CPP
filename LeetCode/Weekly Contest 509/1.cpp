@@ -46,4 +46,4 @@ public:
         return maxim-minim;
     }
     
-};©leetcode
+};
