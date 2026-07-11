@@ -8,86 +8,55 @@ using namespace std;
 #define repRev(i,start,end,decrement) for(ll i=(start);i>(end);i-=(decrement))
 const long long MAX_N = 5005;
 
+ll a[MAX_N],b[MAX_N];
+ll prefixA[MAX_N],prefixB[MAX_N];
 
-ll aBasamaklar[MAX_N],bBasamaklar[MAX_N];
-ll aPrefixDigitSums[MAX_N],bPrefixDigitSums[MAX_N];
-ll aSuffixDigitSums[MAX_N],bSuffixDigitSums[MAX_N];
-array<vector<ll>,10> aDigitleriGordugumYerler;
-array<vector<ll>,10> bDigitleriGordugumYerler;
 ll dp[MAX_N][MAX_N];
 void solve(){
-    string a,b;
-    cin >> a;
-    cin >> b;
-    rep(digit,0,10,1){
-        aDigitleriGordugumYerler[digit].clear();
-        bDigitleriGordugumYerler[digit].clear();
+    string sa ,sb;
+
+    cin >> sa >> sb;
+    rep(i,0,sa.size(),1){
+        a[i] = sa[i] - '0' ;
     }
-    rep(i,0,a.size(),1){
-        aBasamaklar[i] = a[i] - '0';}
-    ll aSize = a.size();
-    ll bSize = b.size();
-    repRev(i,aSize-1,-1,1){
-        if(aBasamaklar[i] == 0){
-            aSize = i;
-        }
-        else{
-            break;
-        }
+    ll sizeA = sa.size();
+    ll sizeB = sb.size();
+    rep(i,0,sb.size(),1){
+        b[i] = sb[i] - '0';
     }
-    repRev(i,bSize-1,-1,1){
-        if(bBasamaklar[i] == 0){
-            bSize = i;
-        }
-        else{
-            break;
-        }
+    prefixA[0] = 0;
+    rep(i,1,sizeA +1,1){
+        prefixA[i]= prefixA[i-1] + a[i - 1];
+        prefixA[i] %= 10;
     }
-    aPrefixDigitSums[0] = 0;
-    rep(i,1,aSize + 1,1){
-        aPrefixDigitSums[i] = aPrefixDigitSums[i-1] + aBasamaklar[i - 1];
-        aPrefixDigitSums[i] %= 10;
-        aDigitleriGordugumYerler[aPrefixDigitSums[i]].push_back(i);
-    } 
-    rep(i,0,bSize,1){
-        bBasamaklar[i] = b[i] - '0';};
-    bPrefixDigitSums[0] = 0; 
-    rep(i,1,bSize + 1,1){
-        bPrefixDigitSums[i] = bPrefixDigitSums[i-1] + bBasamaklar[i - 1];
-        bPrefixDigitSums[i] %= 10;
-        bDigitleriGordugumYerler[bPrefixDigitSums[i]].push_back(i);
-    } 
-    rep(i,0,aSize + 1,1){
-        rep(j,0,bSize + 1,1){
+    prefixB[0] = 0;
+    rep(i,1,sizeB + 1,1){
+        prefixB[i] = prefixB[i - 1] + b[i - 1];
+        prefixB[i] %= 10; 
+    }
+    rep(i,0,sizeA + 1,1){
+        rep(j,0,sizeB + 1,1){
             dp[i][j] = 0;
         }
     }
-    queue<pair<ll,ll>> operationQ;
-    operationQ.push({0,0});
-    while(!operationQ.empty()){
-        auto& [l,r] = operationQ.front();
-        operationQ.pop();
-        rep(digit,0,10,1){
-            // look for the next places where aPrefixSum[i] = digit and bPrefixSum[j] = digit
-            ll i = -1;
-            auto it = upper_bound(aDigitleriGordugumYerler[digit].begin(),
-                      aDigitleriGordugumYerler[digit].end(), l);
-            if (it != aDigitleriGordugumYerler[digit].end()) {
-                i = *it;   
-            }
-            ll j = -1;
-            it = upper_bound(bDigitleriGordugumYerler[digit].begin(),
-                      bDigitleriGordugumYerler[digit].end(), r);
-            if (it != bDigitleriGordugumYerler[digit].end()) {
-                j = *it;   
-            }
-            if(i != -1 && j != -1){
-                dp[i][j] = max(dp[i][j],dp[l][r] + 1);
-                operationQ.push({i,j});
+    
+    rep(i,0,sizeA + 1,1){
+        rep(j,0,sizeB + 1,1){
+            // a yi skiplemisim
+            if(i > 0) dp[i][j] = max(dp[i][j],dp[i-1][j]);
+            // b yi skiplemisim
+            if(j > 0) dp[i][j] = max(dp[i][j],dp[i][j-1]);
+            // a'dan ve b'den i ve j yi almisim.
+            if(i > 0 && j > 0 && prefixA[i] == prefixB[j]){
+                dp[i][j] = max(dp[i][j],dp[i-1][j-1] + 1);
             }
         }
     }
-    cout << (dp[a.size()][b.size()] > 0?dp[a.size()][b.size()]: -1) << "\n";
+    if(prefixA[sizeA] != prefixB[sizeB]){
+        cout << "-1\n";
+        return;
+    }
+    cout << dp[sizeA][sizeB] << "\n";
 
 }
 
