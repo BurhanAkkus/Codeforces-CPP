@@ -51,7 +51,7 @@ void solve(){
     }
     sort(sorted,sorted+n);
     ll t = lower_bound_custom();
-    cout << (t == 0 ? 0LL : (1LL << (t-1))) << "\n";
+    cout << (t == 0 ? 0LL : (1LL << (t-1))) << "\n"; 
 }   
 
 int main(){
