@@ -32,13 +32,13 @@ ll upper_bound_custom(ll* array, ll n, ll element){
 
 // returns the first element i such that array[i] >= element
 ll lower_bound_custom(ll* array, ll n, ll element){
-    // answer lies [l,r), r is excluded.
+    // answer lies [l,r]
     ll l = 0;
     ll r = n;
     while(l < r){
         ll mid = l + (r - l) /2; // rounds down.
         // answer can't be in mid.
-        if(array[mid] < element) {l = mid + 1;} // shrinks the interval [l,r) 
+        if(array[mid] < element) {l = mid + 1;} // shrinks the interval [l,r] 
         else{
             r = mid; // shrinks the interval.
         }
